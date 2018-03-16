@@ -3,6 +3,10 @@
 //my includes
 #include <stdio.h>     
 #include <stdlib.h>
+#include <string.h>
+//#include <iostream>
+
+//using namespace std;
 //library includes
 #include "stdafx.h"
 #include <winsock2.h>
@@ -274,10 +278,14 @@ void pickup_keys_in_room() {//picks up keys if there are any in room
 //pickup items in room
 bool add_item_topack(Item item) {//adds key to known keys if non duplicate
 	if (backpack.number_of_items >= MAX_ITEMS_IN_BACKPACK) {
+		printf("failed!");
 		return false;
 	}
+	sentOption(OPTION_BASE_FOR_PICKUPS + item.number,0);//add item as a move
+	/*
 	backpack.number_of_items++;
 	backpack.items[backpack.number_of_items] = item;
+	*/
 	return true;
 	//return false;
 }
@@ -288,13 +296,14 @@ void pickup_items_in_room() {//picks up keys if there are any in room
 		for (int i = 0; i < room.number_of_items; i++) {
 			printf("item_pickup %X\n", room.items[i].number);
 			//add_key_tokeys(room.keys[i]);
+			// find what it is then do things with it if it is a good item
 			add_item_topack(room.items[i]);
 		}
 		printf("\n");
 	}
 }
 //invsort for best
-bool sort_inv() {
+bool sort_inv() {//sort for highest value and lowest volume
 	//
 	int value[MAX_ITEMS_IN_BACKPACK];
 	//sort to max
@@ -314,11 +323,45 @@ void yourMove()
 	pickup_items_in_room();
 	printf("=========\n");
 
-	if (strcmp(room_name, room.name) != 0) option_count = 0;
+	//if (strcmp(room_name, room.name) != 0) option_count = 0;
 
-	sentOption(options[option_count], 0x1234);
+	//sentOption(options[option_count], 0x1234);
 
-	option_count = (option_count + 1) % number_of_options;
+	//option_count = (option_count + 1) % number_of_options;
+	//option_count = OPTION_MOVE_NORTH;;
+	char x[255];
+	for (int i = 0; i < 255; i++) {
+		x[i] = '\0';
+	}
+	//String x;
+	//cin >> x;
+	scanf(" %c", &x); // Notice the whitespace in the format string
+	printf("-%s-", x);
+	switch (x[0])
+	{
+	case'w'://n
+		option_count = OPTION_MOVE_NORTH;
+		break;
+	case's'://s
+		option_count = OPTION_MOVE_SOUTH;
+		break;
+	case'a'://e
+		option_count = OPTION_MOVE_EAST;
+		break;
+	case'd'://w
+		option_count = OPTION_MOVE_WEST;
+		break;
+	case'q'://d
+		option_count = OPTION_MOVE_DOWN;
+		break;
+	case'e'://u
+		option_count = OPTION_MOVE_UP;
+		break;
+	default:
+		printf("IV ix");//invalid instruction
+		break;
+	}
+	sentOption(option_count, 0x1234);
 }
 
 
@@ -713,7 +756,7 @@ void communicate_with_server()
 				printRoom();
 				printOptions();
 
-				system("timeout /t 60");
+				//system("timeout /t 60");//commented out
 
 				yourMove();
 			}
