@@ -66,10 +66,10 @@ class servermain:
         for x in range(len(dat)):#strip newlines
             dat[x] = dat[x].strip('\n')
             
-        temp=[]#process the data
+        temp=[]             #process the data for use in the array
         xtemp=''
         for x in dat:
-            for y in range(len(x)):
+            for y in range(len(x)):#iterate through the lines, where there is a comma [,] we add the data got to the array [temp]
                 if (x[y] == ','):
                     temp.append(xtemp)
                     xtemp=''
