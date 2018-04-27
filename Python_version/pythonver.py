@@ -1,5 +1,5 @@
 import socket                   # Import socket module
-import mazeroute2 as mazeroute  # Import the predefined route
+#import mazeroute2 as mazeroute  # Import the predefined route
 import threading                # Import threading module
 
 class servermain:
@@ -15,7 +15,9 @@ class servermain:
     STUDENT_FIRSTNAME   ="Robert"   #name
     STUDENT_FAMILYNAME  ="Painter"  #
     #
-    
+
+    #route
+    mvkeyarray=[]
     ##methods
     #main loop for sending data to the server (thread 1)
     def mainloop(self):
@@ -35,12 +37,14 @@ class servermain:
         print('sent',RegisterString,'ports',(self.host_s, self.PORT_SERVER))#debug (print what was sent)
 
         #here we keep sending the data to the server, as no response is required we can send it all at once
-        for x in range(0,len(mazeroute.mvkeyarray),2):#for each item in the array,steps set to 2
-            senddata = "Option "+str(mazeroute.mvkeyarray[x])+", "+str(mazeroute.mvkeyarray[x+1])#build the option string
+        for x in range(0,len(self.mvkeyarray),2):#for each item in the array,steps set to 2
+            senddata = "Option "+str(self.mvkeyarray[x])+", "+str(self.mvkeyarray[x+1])#build the option string
             print('SENT['+str(self.host_s)+']: ',end='')#print what was sent
             print(senddata)#debug
             ssrv.sendto(senddata.encode('utf-8'),(self.host_s, self.PORT_SERVER))#send to the server
-        print('sent num of moves: '+str(len(mazeroute.mvkeyarray)/2))
+        print('sent num of moves: '+str(len(self.mvkeyarray)/2))
+
+        
     ##recieve method for thread 2     
     def recieveloop(self):
         scli = socket.socket(   socket.AF_INET,     # Internet,UDP
@@ -54,6 +58,27 @@ class servermain:
         #scli.close()
         #ssrv.close()
             
+    def loadroute(self):#load route from file
+        f = open('route.dat')   #open the file
+        dat = f.readlines()     #read its data
+        f.close()               #close file
+        
+        for x in range(len(dat)):#strip newlines
+            dat[x] = dat[x].strip('\n')
+            
+        temp=[]#process the data
+        xtemp=''
+        for x in dat:
+            for y in range(len(x)):
+                if (x[y] == ','):
+                    temp.append(xtemp)
+                    xtemp=''
+                else:
+                    xtemp+=x[y]
+        #print(temp)
+        self.mvkeyarray= temp#assign it to the move array
+        #self.mvkeyarray = mazeroute.mvkeyarray
+    
     def initialise(self):#threading initialisiation
         t1 = threading.Thread(target = self.mainloop)#set up threads for sending/recieving data
         t2 = threading.Thread(target = self.recieveloop)
@@ -66,7 +91,8 @@ class servermain:
 
 
 
-c=servermain()#instanciate class
+c=servermain()#instantiate class
 #c.mainloop()#do the process
+c.loadroute() #load the route from memory
 c.initialise()#initialise threads and do the processes
 print('DONE!')
